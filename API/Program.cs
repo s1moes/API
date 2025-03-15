@@ -30,6 +30,7 @@ builder.Services.AddEndpointsApiExplorer();
 var app = builder.Build();
 
 app.UseHealthChecks("/health");
+app.UseRouting();
 app.UseCors("AllowAllOrigins");
 
 app.UseAuthorization();

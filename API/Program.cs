@@ -1,6 +1,4 @@
 using MongoDB.Driver;
-using System.Text.Json.Serialization;
-using System.Diagnostics.CodeAnalysis;
 
 var builder = WebApplication.CreateSlimBuilder(args);
 
@@ -25,13 +23,7 @@ builder.Services.AddCors(options =>
                         .AllowAnyHeader());
 });
 
-[RequiresUnreferencedCode("MVC does not currently support trimming or native AOT.")]
-void AddControllersWithWarning(IServiceCollection services)
-{
-    services.AddControllers();
-}
-
-AddControllersWithWarning(builder.Services);
+builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 
 var app = builder.Build();
@@ -39,7 +31,8 @@ var app = builder.Build();
 app.UseHealthChecks("/health");
 app.UseRouting();
 app.UseCors("AllowAllOrigins");
-
 app.UseAuthorization();
+
 app.MapControllers();
+
 app.Run();

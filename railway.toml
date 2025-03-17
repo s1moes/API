@@ -3,8 +3,6 @@ builder = "dockerfile"
 dockerfilePath = "./API/Dockerfile"
 
 [deploy]
-startCommand = "./API"
+startCommand = "dotnet API.dll"
 restartPolicyType = "always"
 healthcheckPath = "/health"
-dotnet restore
-dotnet build

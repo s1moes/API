@@ -3,6 +3,6 @@ builder = "dockerfile"
 dockerfilePath = "./API/Dockerfile"
 
 [deploy]
-startCommand = "/API.dll"
+startCommand = "./API"
 restartPolicyType = "always"
 healthcheckPath = "/health"

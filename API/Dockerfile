@@ -1,32 +1,22 @@
-# Base image for building the application
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+# Install clang/zlib1g-dev dependencies for publishing to native
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
+    clang zlib1g-dev
 ARG BUILD_CONFIGURATION=Release
-
 WORKDIR /src
-
-# Copy and restore dependencies
-COPY ["API/API.csproj", "API/"]
-RUN dotnet restore "./API/API.csproj"
-
-# Copy the rest of the app source
+COPY ["RailwayDeploymentAot/RailwayDeploymentAot.csproj", "RailwayDeploymentAot/"]
+RUN dotnet restore "./RailwayDeploymentAot/RailwayDeploymentAot.csproj"
 COPY . .
-WORKDIR "/src/API"
+WORKDIR "/src/RailwayDeploymentAot"
+RUN dotnet build "./RailwayDeploymentAot.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
-# Build the app
-RUN dotnet build "./API.csproj" -c $BUILD_CONFIGURATION -o /app/build
-
-# Publish the app
 FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
-RUN dotnet publish "./API.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=true
+RUN dotnet publish "./RailwayDeploymentAot.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=true
 
-# FINAL IMAGE: Uses ASP.NET runtime instead of just runtime dependencies
-FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS final
+FROM mcr.microsoft.com/dotnet/runtime-deps:8.0 AS final
 WORKDIR /app
 EXPOSE 8080
-
-# Copy the published app
 COPY --from=publish /app/publish .
-
-# Correct entrypoint
-ENTRYPOINT ["dotnet", "API.dll"]
+ENTRYPOINT ["./RailwayDeploymentAot"]

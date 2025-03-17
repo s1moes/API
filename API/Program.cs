@@ -1,13 +1,20 @@
-var builder = WebApplication.CreateBuilder(args);
+using MongoDB.Driver;
 
-// Get the assigned PORT from Railway, default to 8080
+var builder = WebApplication.CreateSlimBuilder(args);
+
 var port = Environment.GetEnvironmentVariable("PORT") ?? "8080";
-Console.WriteLine($"Starting on port: {port}");  // Add this log
 builder.WebHost.UseUrls($"http://*:{port}");
 
-// Add services to the container
-builder.Services.AddControllers();
+var connectionString = Environment.GetEnvironmentVariable("DbConnection");
+var mongoClient = new MongoClient(connectionString);
+var dataBaseName = "ToDo";
+var dataBase = mongoClient.GetDatabase(dataBaseName);
+
+builder.Services.AddSingleton<IMongoClient>(mongoClient);
+builder.Services.AddSingleton<IMongoDatabase>(dataBase);
+
 builder.Services.AddHealthChecks();
+
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAllOrigins",
@@ -15,14 +22,17 @@ builder.Services.AddCors(options =>
                         .AllowAnyMethod()
                         .AllowAnyHeader());
 });
+
+
 builder.Services.AddEndpointsApiExplorer();
 
 var app = builder.Build();
 
+app.UseHealthChecks("/health");
 app.UseRouting();
 app.UseCors("AllowAllOrigins");
 app.UseAuthorization();
-app.UseHealthChecks("/health");
+
 app.MapControllers();
 
 app.Run();

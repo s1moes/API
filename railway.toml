@@ -3,7 +3,6 @@ builder = "dockerfile"
 dockerfilePath = "./API/Dockerfile"
 
 [deploy]
-startCommand = "dotnet /app/API.dll"
+startCommand = "/API.dll"
 restartPolicyType = "always"
-healthcheckPath = "http://0.0.0.0:8080/health"
-
+healthcheckPath = "/health"

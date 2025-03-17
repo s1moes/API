@@ -6,3 +6,5 @@ dockerfilePath = "./API/Dockerfile"
 startCommand = "./API"
 restartPolicyType = "always"
 healthcheckPath = "/health"
+dotnet restore
+dotnet build

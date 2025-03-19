@@ -35,5 +35,7 @@ app.MapGet("/api/compras", async (ICompraAppService compraAppService, IMapper ma
     return Results.Ok(JsonConvert.SerializeObject(comprasDto));
 });
 
+app.UseHealthChecks("/health");
+
 // Run the app
 app.Run();

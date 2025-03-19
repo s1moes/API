@@ -19,6 +19,8 @@ builder.Services.AddSingleton<IMongoClient>(mongoClient);
 var port = Environment.GetEnvironmentVariable("PORT") ?? "8080";
 builder.WebHost.UseUrls($"http://*:{port}");
 
+builder.Services.AddHealthChecks();
+
 // AutoMapper setup (if needed)
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 

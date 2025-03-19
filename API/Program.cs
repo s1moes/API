@@ -6,10 +6,7 @@ using System.Text.Json;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Register services
-builder.Services.AddSingleton<ICompraAppService, CompraAppService>();
-
-
+builder.Services.AddHealthChecks();
 
 // MongoDB setup
 var connectionString = "DbConnection";
@@ -18,11 +15,16 @@ var database = mongoClient.GetDatabase("ToDo");
 builder.Services.AddSingleton<IMongoDatabase>(database);
 builder.Services.AddSingleton<IMongoClient>(mongoClient);
 
+// Register services
+builder.Services.AddSingleton<ICompraAppService, CompraAppService>();
+
 // AutoMapper setup (if needed)
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
 // Setup Minimal API
 var app = builder.Build();
+
+app.UseHealthChecks("/health");
 
 app.MapGet("/api/shopping", async (ICompraAppService compraAppService, IMapper mapper) =>
 {

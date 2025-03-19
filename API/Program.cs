@@ -6,6 +6,9 @@ using Newtonsoft.Json;
 
 var builder = WebApplication.CreateBuilder(args);
 
+var port = Environment.GetEnvironmentVariable("PORT") ?? "8080";
+builder.WebHost.UseUrls($"http://*:{port}");
+
 // Register services
 builder.Services.AddSingleton<ICompraAppService, CompraAppService>();
 
@@ -15,9 +18,6 @@ var mongoClient = new MongoClient(connectionString);
 var database = mongoClient.GetDatabase("ToDo");
 builder.Services.AddSingleton<IMongoDatabase>(database);
 builder.Services.AddSingleton<IMongoClient>(mongoClient);
-
-var port = Environment.GetEnvironmentVariable("PORT") ?? "8080";
-builder.WebHost.UseUrls($"http://*:{port}");
 
 builder.Services.AddHealthChecks();
 

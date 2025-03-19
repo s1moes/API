@@ -1,8 +1,6 @@
 using API.Models;
 using API.Services;
 using AutoMapper;
-using MongoDB.Bson.Serialization.Serializers;
-using MongoDB.Bson;
 using MongoDB.Driver;
 using Newtonsoft.Json;
 
@@ -21,10 +19,6 @@ var database = mongoClient.GetDatabase("ToDo");
 builder.Services.AddSingleton<IMongoDatabase>(database);
 builder.Services.AddSingleton<IMongoClient>(mongoClient);
 
-builder.Services.AddHealthChecks();
-
-MongoDB.Bson.Serialization.BsonSerializer.RegisterSerializer(new GuidSerializer(BsonType.String));
-
 // AutoMapper setup (if needed)
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
@@ -38,8 +32,6 @@ app.MapGet("/api/compras", async (ICompraAppService compraAppService, IMapper ma
     var comprasDto = mapper.Map<List<CompraDto>>(compras);
     return Results.Ok(JsonConvert.SerializeObject(comprasDto));
 });
-
-app.MapHealthChecks("/health");
 
 // Run the app
 app.Run();

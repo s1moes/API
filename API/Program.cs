@@ -1,42 +1,35 @@
-using System.Text.Json.Serialization;
+using API.Models;
+using API.Services;
+using AutoMapper;
+using MongoDB.Driver;
+using System.Text.Json;
 
-var builder = WebApplication.CreateSlimBuilder(args);
+var builder = WebApplication.CreateBuilder(args);
 
-var port = Environment.GetEnvironmentVariable("PORT") ?? "8080";
-builder.WebHost.UseUrls($"http://*:{port}");
+// Register services
+builder.Services.AddSingleton<ICompraAppService, CompraAppService>();
 
-builder.Services.AddHealthChecks();
 
-builder.Services.ConfigureHttpJsonOptions(options =>
-{
-	options.SerializerOptions.TypeInfoResolverChain.Insert(0, AppJsonSerializerContext.Default);
-});
 
+// MongoDB setup
+var connectionString = "DbConnection";
+var mongoClient = new MongoClient(connectionString);
+var database = mongoClient.GetDatabase("ToDo");
+builder.Services.AddSingleton<IMongoDatabase>(database);
+builder.Services.AddSingleton<IMongoClient>(mongoClient);
+
+// AutoMapper setup (if needed)
+builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+
+// Setup Minimal API
 var app = builder.Build();
 
-var sampleTodos = new Todo[] {
-	new(1, "Walk the dog"),
-	new(2, "Do the dishes", DateOnly.FromDateTime(DateTime.Now)),
-	new(3, "Do the laundry", DateOnly.FromDateTime(DateTime.Now.AddDays(1))),
-	new(4, "Clean the bathroom"),
-	new(5, "Clean the car", DateOnly.FromDateTime(DateTime.Now.AddDays(2)))
-};
-
-app.UseHealthChecks("/health");
-
-var todosApi = app.MapGroup("/todos");
-todosApi.MapGet("/", () => sampleTodos);
-todosApi.MapGet("/{id}", (int id) =>
-	sampleTodos.FirstOrDefault(a => a.Id == id) is { } todo
-		? Results.Ok(todo)
-		: Results.NotFound());
-
-app.Run();
-
-public record Todo(int Id, string? Title, DateOnly? DueBy = null, bool IsComplete = false);
-
-[JsonSerializable(typeof(Todo[]))]
-internal partial class AppJsonSerializerContext : JsonSerializerContext
+app.MapGet("/api/shopping", async (ICompraAppService compraAppService, IMapper mapper) =>
 {
+    var compras = await compraAppService.GetAllComprasAsync();
+    var comprasDto = mapper.Map<List<CompraDto>>(compras);
+    return Results.Json(comprasDto, new JsonSerializerOptions { PropertyNamingPolicy = null });
+});
 
-}
+// Run the app
+app.Run();

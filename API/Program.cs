@@ -9,8 +9,6 @@ var builder = WebApplication.CreateBuilder(args);
 var port = Environment.GetEnvironmentVariable("PORT") ?? "8080";
 builder.WebHost.UseUrls($"http://*:{port}");
 
-builder.Services.AddHealthChecks();
-
 // MongoDB setup
 var connectionString = "DbConnection";
 var mongoClient = new MongoClient(connectionString);
@@ -26,8 +24,6 @@ builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
 // Setup Minimal API
 var app = builder.Build();
-
-app.UseHealthChecks("/health");
 
 app.MapGet("/api/shopping", async (ICompraAppService compraAppService, IMapper mapper) =>
 {

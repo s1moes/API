@@ -1,6 +1,8 @@
 using API.Models;
 using API.Services;
 using AutoMapper;
+using MongoDB.Bson.Serialization.Serializers;
+using MongoDB.Bson;
 using MongoDB.Driver;
 using Newtonsoft.Json;
 
@@ -20,6 +22,8 @@ builder.Services.AddSingleton<IMongoDatabase>(database);
 builder.Services.AddSingleton<IMongoClient>(mongoClient);
 
 builder.Services.AddHealthChecks();
+
+MongoDB.Bson.Serialization.BsonSerializer.RegisterSerializer(new GuidSerializer(BsonType.String));
 
 // AutoMapper setup (if needed)
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());

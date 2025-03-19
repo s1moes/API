@@ -2,22 +2,19 @@ using API.Models;
 using API.Services;
 using AutoMapper;
 using MongoDB.Driver;
-using System.Text.Json;
+using Newtonsoft.Json;
 
 var builder = WebApplication.CreateBuilder(args);
 
-var port = Environment.GetEnvironmentVariable("PORT") ?? "8080";
-builder.WebHost.UseUrls($"http://*:{port}");
+// Register services
+builder.Services.AddSingleton<ICompraAppService, CompraAppService>();
 
 // MongoDB setup
-var connectionString = "DbConnection";
+var connectionString = "mongodb+srv://s1moes:Futebolista23.@todo.kdhkh.mongodb.net/?retryWrites=true&w=majority&appName=ToDo";
 var mongoClient = new MongoClient(connectionString);
 var database = mongoClient.GetDatabase("ToDo");
 builder.Services.AddSingleton<IMongoDatabase>(database);
 builder.Services.AddSingleton<IMongoClient>(mongoClient);
-
-// Register services
-builder.Services.AddSingleton<ICompraAppService, CompraAppService>();
 
 // AutoMapper setup (if needed)
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
@@ -25,11 +22,12 @@ builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 // Setup Minimal API
 var app = builder.Build();
 
-app.MapGet("/api/shopping", async (ICompraAppService compraAppService, IMapper mapper) =>
+// Define the endpoints
+app.MapGet("/api/compras", async (ICompraAppService compraAppService, IMapper mapper) =>
 {
     var compras = await compraAppService.GetAllComprasAsync();
     var comprasDto = mapper.Map<List<CompraDto>>(compras);
-    return Results.Json(comprasDto, new JsonSerializerOptions { PropertyNamingPolicy = null });
+    return Results.Ok(JsonConvert.SerializeObject(comprasDto));
 });
 
 // Run the app
